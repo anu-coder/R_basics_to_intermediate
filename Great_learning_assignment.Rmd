@@ -1,0 +1,234 @@
+---
+title: "Great Learnings: Financial Analyst"
+subtitle: "Assignment"
+author: 
+  name: "Anurima Dey"
+date: 21st-October-2020
+output: html_notebook
+---
+
+# Problem statements: 
+
+**1. Perform Univariate analysis on the data 'Latest'**
+**2. Perform Bivariate analysis on data 'Latest' with Prospect Stage = Enrolled as point of interest. Business wants to understand what factors drive erollments?**
+**3. Data 'Trails' gives the history of all the sales activities done to nurture a lead. Could you identify the variables that infuence conversion of a lead into enrollment?**
+
+
+```{r}
+latest.file <- readxl::read_xlsx("latest - orig.xlsx")
+trail.file <- readxl::read_xlsx("trails - orig.xlsx")
+```
+
+```{r}
+head(latest.file)
+```
+```{r}
+head(trail.file)
+```
+```{r}
+colnames(latest.file)
+```
+```{r}
+str(latest.file)
+```
+
+```{r}
+summary(latest.file)
+```
+
+```{r}
+plot(latest.file[,c("Score", "EngagementScore","mx_Exp_In_Years" )])
+```
+
+
+Make a proper function to obtain the min, max, avg, %null, and all the quantiles, and keep adding the columns in a data frame using rbind
+
+```{r}
+# the quantitative variable 
+score <-  latest.file$Score
+
+# minimum score 
+min <- min(score, na.rm = TRUE)
+
+# maximum score
+max <- max(score, na.rm = TRUE)
+
+# average score
+avg <- mean(score, na.rm = T)
+
+# % null values
+null <- sum(is.na(score))/length(score)*100
+```
+
+```{r}
+quantitative_vars <- cbind(as.data.frame(min), as.data.frame(max), as.data.frame(avg), as.data.frame(null), t(data.frame(quantile(score, c(seq(0.05, 0.95, 0.05)), na.rm = TRUE))))
+
+```
+
+```{r}
+quantitative_vars
+```
+
+```{r}
+# the quantitative variable 
+Engagementscore <-  latest.file$EngagementScore
+
+# minimum score 
+min <- min(Engagementscore, na.rm = TRUE)
+
+# maximum score
+max <- max(Engagementscore, na.rm = TRUE)
+
+# average score
+avg <- mean(Engagementscore, na.rm = T)
+
+# % null values
+null <- sum(is.na(Engagementscore))/length(Engagementscore)*100
+```
+
+```{r}
+Engagementscore <- cbind(as.data.frame(min), as.data.frame(max), as.data.frame(avg), as.data.frame(null), t(data.frame(quantile(Engagementscore, c(seq(0.05, 0.95, 0.05)), na.rm = TRUE))))
+```
+
+```{r}
+quantitative_vars <- rbind(quantitative_vars, Engagementscore)
+```
+
+```{r}
+row.names(quantitative_vars) <- c("Score", "Engagementscore")
+```
+
+# The first table is accomplished
+
+```{r}
+quantitative_vars
+```
+
+# table two: for qualitative variables
+
+```{r}
+as.factor(latest$mx_Preferred_Campus)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Working on Latest file
+
+Find the missing percentage of each column
+
+```{r}
+missing_percentage <- colSums(is.na(latest.file))/dim(latest.file)[1] * 100
+```
+
+```{r}
+missing_percentage
+```
+We shall ideally discard variables with more than 30% missing values
+
+The variables with more than 30% missing values are:
+```{r}
+colnames(latest.file)[missing_percentage >=30]
+```
+
+Variables that remains
+
+```{r}
+latest <- subset(latest.file, select = -c(mx_Country, mx_Mode_of_Instruction, mx_Application_Date, 
+                                           mx_Industry, mx_UG_Degree, mx_UG_Passing_Year, mx_PG_Degree,
+                                           mx_PG_Passing_Year, mx_Batch_Code, mx_City, mx_Device_details))
+
+head(latest)
+```
+The columns thata are presesnt now in latest
+
+```{r}
+colnames(latest)
+```
+
+Finding the unique values in each columns
+And pointing out their mistakes
+
+mx_prefered_campus: mistakes = "Select One", NA, "BABI....."
+
+```{r}
+unique(latest$mx_Preferred_Campus)
+```
+mx_exp_in_years: "42339", NA, "Select One"
+ 
+```{r}
+unique(latest$mx_Exp_In_Years)
+```
+
+
+```{r}
+unique(latest$DoNotCall)
+```
+```{r}
+unique(latest$DoNotEmail)
+```
+```{r}
+unique(latest$Source)
+```
+
+SourceMedium: NA, factoring doesnot matter
+Sourcecampaign: NA, factoring doesnot help
+
+
+Prospect stage:
+
+__This variable is important__: "Enrolled" 
+
+__This is our dependant variable__
+The state of this is dependent on the other variables.
+
+```{r}
+unique(latest$ProspectStage)
+```
+
+__Score, Engagement score__ are two Quantitative variables
+
+```{r}
+unique(latest$Score)
+```
+Na there
+
+```{r}
+table(latest$mx_Current_Interested_Program)
+```
+
+
+```{r}
+table(latest$ProspectStage)
+```
+
+```{r}
+barplot(latest$Score)
+```
+
+
+
+
+
+
+
+
